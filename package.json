@@ -12,6 +12,8 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@atcute/car": "^3.0.1",
+    "@atproto/api": "^0.14.18",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },

@@ -2,56 +2,158 @@
   font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;
   font-weight: 400;
-
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
   min-height: 100vh;
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+.app-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content-container {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  height: calc(100vh - 100px);
+}
+
+.auth-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding: 2rem;
+  overflow-y: auto;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 400px;
+}
+
+.repo-visualizer-container {
+  flex: 1;
+  padding: 1rem;
+  border-left: 1px solid rgba(255, 255, 255, 0.1);
+  width: 100%;
+}
+
+.visualizer {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+
+  .viz-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .3em;
+
+    button {
+     width: fit-content;
+     background: whitesmoke;
+     color: #000;
+    }
+  }
+}
+
+.user-info {
+  margin-top: .6em;
+  padding: .1em 1em;
+  border-radius: 6px;
+  display: flex;
+  gap: .4em;
+  align-items: center;
+
+  img {
+    height: 60px;
+    width: 60px;
+    border-radius: 100%;
+  }
+}
+
+.handle-input,
+.password-input {
+  width: 92%;
+  height: 30px;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  background-color: rgba(255, 255, 255, 0.05);
 }
 
 button {
+  width: 100%;
   border-radius: 8px;
   border: 1px solid transparent;
   padding: 0.6em 1.2em;
   font-size: 1em;
-  font-weight: 500;
+  font-weight: 400;
   font-family: inherit;
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
 }
-button:hover {
+
+button:hover:not([disabled]) {
   border-color: #646cff;
 }
+
 button:focus,
 button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
+}
+
+button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error-message {
+  color: #ff6b6b;
+  font-size: 0.9rem;
+  padding: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .content-container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .repo-visualizer-container {
+    border-left: none;
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .auth-container,
+  .repo-visualizer-container {
+    flex: none;
+    width: 100%;
+    min-height: 50vh;
+  }
 }
 
 @media (prefers-color-scheme: light) {
@@ -59,10 +161,186 @@ button:focus-visible {
     color: #213547;
     background-color: #ffffff;
   }
+
   a:hover {
     color: #747bff;
   }
+
   button {
     background-color: #f9f9f9;
   }
+
+  .handle-input,
+  .password-input {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  .visualizer-container {
+    background-color: rgba(0, 0, 0, 0.01);
+    border-left: 1px solid rgba(0, 0, 0, 0.1);
+  }
+}
+
+.repo-visualizer-container {
+  --bg-color: #121212;
+  --card-bg: #1e1e1e;
+  --border-color: rgba(255, 255, 255, 0.1);
+  --text-color: rgba(255, 255, 255, 0.87);
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --accent-color: #a0a0a0;
+  --accent-hover: #0060c0;
+  --tab-bg: rgba(255, 255, 255, 0.5);
+  --tab-active-bg: rgba(255, 255, 255, 0.1);
+  --error-color: #ff6b6b;
+
+  width: 100%;
+  overflow: hidden;
+}
+
+.viz-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid var(--border-color);
+}
+
+.viz-tabs {
+  display: flex;
+  width: 100%;
+
+  button {
+    background: none;
+    border: none;
+    width: fit-content;
+    padding: 8px 10px;
+    margin-right: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--text-secondary);
+    border-radius: 16px;
+    outline: none;
+  }
+}
+
+.viz-tabs button.active {
+  background-color: #3f3f3f;
+  color: var(--text-color);
+}
+
+.refresh-button {
+  background-color: #3f3f3f;
+  color: white;
+  border: none;
+  border-radius: 16px;
+  font-size: 13px;
+  cursor: pointer;
+  padding: 10px 16px;
+  width: 150px;
+}
+
+.refresh-button:hover {
+  background-color: var(--accent-hover);
+}
+
+.posts-container {
+  padding: 0;
+  overflow-y: auto;
+  display: flex;
+  flex-flow: column;
+  gap: .8em;
+  margin-top: 1em;
+}
+
+.post-card {
+  padding: 16px;
+  background: #1a1a1a;
+  border-radius: 8px;
+}
+
+.post-card:last-child {
+  border-bottom: none;
+}
+
+.post-header {
+  margin-bottom: 8px;
+}
+
+.post-author {
+  font-weight: 400;
+  margin-right: 6px;
+}
+
+.post-handle {
+  color: var(--text-secondary);
+  font-size: 14px;
+  margin-right: 6px;
+}
+
+.post-date {
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.post-content {
+  font-size: 15px;
+  line-height: 1.4;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+}
+
+.loading-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 0;
+  background-color: var(--card-bg);
+}
+
+.loading-spinner {
+  width: 30px;
+  height: 30px;
+  border: 3px solid rgba(255, 255, 255, 0.1);
+  border-top-color: var(--accent-color);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.error-message {
+  padding: 12px;
+  background-color: rgba(255, 0, 0, 0.1);
+  color: var(--error-color);
+  border-radius: 4px;
+  font-size: 14px;
+  margin: 8px;
+}
+
+.post-error {
+  padding: 12px;
+  background-color: rgba(255, 0, 0, 0.1);
+  color: var(--error-color);
+  border-radius: 4px;
+  font-size: 14px;
+  margin: 8px 0;
+}
+
+.no-data-message {
+  padding: 16px;
+  color: var(--text-secondary);
+  text-align: center;
+}
+
+.likes-container,
+.follows-container {
+  padding: 16px;
+  color: var(--text-secondary);
 }
