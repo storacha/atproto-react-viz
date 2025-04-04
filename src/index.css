@@ -37,7 +37,7 @@ h1 {
 }
 
 .auth-container {
-  flex: 1;
+  flex: 1.5;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -257,6 +257,10 @@ button[disabled] {
   padding: 16px;
   background: #1a1a1a;
   border-radius: 8px;
+
+  :hover {
+    cursor: pointer;
+  }
 }
 
 .post-card:last-child {

@@ -1,8 +1,7 @@
 import { ChangeEvent, useEffect, useState } from 'react'
 import AtpAgent from "@atproto/api"
-import { BlueSkySessionData, Post } from './utils/types'
+import { BlueSkySessionData } from './utils/types'
 import { iterateAtpRepo, RepoEntry } from "@atcute/car"
-import { formatDate } from './utils/ui';
 import { PostVisualizer } from './stories/PostsVisualizer';
 
 interface VisualizerProps {
