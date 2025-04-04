@@ -12,8 +12,10 @@
     "build-storybook": "storybook build"
   },
   "dependencies": {
+    "@atproto/api": "^0.14.18",
     "react": "^19.0.0",
-    "react-dom": "^19.0.0"
+    "react-dom": "^19.0.0",
+    "react-json-view": "^1.21.3"
   },
   "devDependencies": {
     "@chromatic-com/storybook": "^3",
