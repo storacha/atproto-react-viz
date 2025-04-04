@@ -1,4 +1,5 @@
 import type { StorybookConfig } from '@storybook/react-vite';
+import tailwindcss from '@tailwindcss/vite'
 
 const config: StorybookConfig = {
   "stories": [
@@ -11,6 +12,11 @@ const config: StorybookConfig = {
     "@chromatic-com/storybook",
     "@storybook/experimental-addon-test"
   ],
+  viteFinal: (config) => {
+    config.plugins?.push(tailwindcss());
+
+    return config;
+  },
   "framework": {
     "name": "@storybook/react-vite",
     "options": {}
