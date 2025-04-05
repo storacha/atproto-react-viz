@@ -249,45 +249,46 @@ button[disabled] {
   overflow-y: auto;
   display: flex;
   flex-flow: column;
-  gap: .8em;
+  gap: .6em;
   margin-top: 1em;
 }
 
-.post-card {
+.atp-post-card {
   padding: 16px;
   background: #1a1a1a;
   border-radius: 8px;
+  margin: .1em 0;
 
   :hover {
     cursor: pointer;
   }
 }
 
-.post-card:last-child {
+.atp-post-card:last-child {
   border-bottom: none;
 }
 
-.post-header {
+.atp-post-header {
   margin-bottom: 8px;
 }
 
-.post-author {
+.atp-post-author {
   font-weight: 400;
   margin-right: 6px;
 }
 
-.post-handle {
+.atp-post-handle {
   color: var(--text-secondary);
   font-size: 14px;
   margin-right: 6px;
 }
 
-.post-date {
+.atp-post-date {
   color: var(--text-secondary);
   font-size: 14px;
 }
 
-.post-content {
+.atp-post-content {
   font-size: 15px;
   line-height: 1.4;
   white-space: pre-wrap;
@@ -328,7 +329,7 @@ button[disabled] {
   margin: 8px;
 }
 
-.post-error {
+.atp-post-error {
   padding: 12px;
   background-color: rgba(255, 0, 0, 0.1);
   color: var(--error-color);
@@ -337,7 +338,7 @@ button[disabled] {
   margin: 8px 0;
 }
 
-.no-data-message {
+.atp-no-data-message {
   padding: 16px;
   color: var(--text-secondary);
   text-align: center;

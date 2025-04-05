@@ -99,7 +99,11 @@ const Visualizer = ({ session, agent }: VisualizerProps) => {
         </div>
       )}
 
-      {!loading && activeView === "posts" && <PostVisualizer posts={posts} session={session} />}
+      {!loading && activeView === "posts" && (
+        <div className="posts-container">
+          <PostVisualizer posts={posts} session={session} />
+        </div>
+      )}
 
       {!loading && activeView === "likes" && (
         <div className="likes-container">

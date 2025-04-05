@@ -1,14 +1,16 @@
 import type { Meta, StoryObj } from '@storybook/react';
 import { PostVisualizer } from "./PostsVisualizer";
 import { RepoEntry } from "@atcute/car";
-import { AtpSessionData } from "@atproto/api";
+
+import { BlueSkySessionData } from '../utils/types';
 
 const meta: Meta<typeof PostVisualizer> = {
   title: 'Components/PostVisualizer',
   component: PostVisualizer,
   parameters: {
-    layout: 'fullscreen',
+    layout: 'centered',
   },
+  tags: ["autodocs"]
 };
 
 export default meta;
@@ -44,7 +46,7 @@ const samplePosts: RepoEntry[] = [
   },
 ];
 
-const sampleSession: AtpSessionData = {
+const sampleSession: Partial<BlueSkySessionData> = {
   handle: 'johndoe.bsky.social',
   did: 'did:plc:abcdef123456',
   email: 'john@example.com',
@@ -88,12 +90,5 @@ export const WithError: Story = {
       ...samplePosts,
     ],
     session: sampleSession,
-  },
-};
-
-export const WithoutSession: Story = {
-  args: {
-    posts: samplePosts,
-    session: undefined,
   },
 };
