@@ -24,6 +24,8 @@ const samplePosts: RepoEntry[] = [
       createdAt: '2025-04-03T14:53:12.000Z',
     },
     uri: 'at://user.bsky.social/posts/1',
+    // @ts-expect-error this is just a test cid. It doesn't really have to
+    // follow CidLink
     cid: 'bafyreia...',
   },
   {
@@ -33,6 +35,8 @@ const samplePosts: RepoEntry[] = [
       createdAt: '2025-04-02T09:32:01.000Z',
     },
     uri: 'at://user.bsky.social/posts/2',
+    // @ts-expect-error this is just a test cid. It doesn't really have to
+    // follow CidLink
     cid: 'bafyreib...',
   },
   {
@@ -42,6 +46,8 @@ const samplePosts: RepoEntry[] = [
       createdAt: '2025-04-01T18:21:45.000Z',
     },
     uri: 'at://user.bsky.social/posts/3',
+    // @ts-expect-error this is just a test cid. It doesn't really have to
+    // follow CidLink
     cid: 'bafyreic...',
   },
 ];

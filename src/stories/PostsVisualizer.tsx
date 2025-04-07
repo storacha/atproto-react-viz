@@ -2,8 +2,10 @@ import { RepoEntry } from "@atcute/car";
 import { AtpSessionData } from "@atproto/api";
 import { Post } from "../utils/types";
 import { formatDate } from "../utils/ui";
+import { useState } from "react";
 
 interface PostVisualizerProps {
+  did?: string;
   posts: RepoEntry[];
   className?: string;
   session?: AtpSessionData;
@@ -60,3 +62,14 @@ export const PostVisualizer = ({ posts, session, className = "" }: PostVisualize
     </>
   );
 };
+
+interface PostProps extends Pick<PostVisualizerProps, "did"> {}
+
+// work in progress
+// export const Posts = ({did}: PostProps) => {
+//   const [repo, setRepo] = useState<Uint8Array>()
+//   const [parsedRepo, setParsedRepo] = useState
+//   return (
+
+//   )
+// }
