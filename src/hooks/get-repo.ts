@@ -1,45 +1,62 @@
 import { iterateAtpRepo, RepoEntry } from "@atcute/car"
 import AtpAgent from "@atproto/api"
-import { useEffect, useState } from "react"
+import { useCallback, useEffect, useState } from "react"
 
 export type State = "loading" | "idle"
 
-export const useRepo = ({did, agent}: {did: string, agent: AtpAgent}) => {
+export type RepoParams = {
+  did: string;
+  agent: AtpAgent
+}
+
+export const useRepo = ({ did, agent }: RepoParams) => {
   const [repo, setRepo] = useState<Uint8Array>()
   const [parsedRepo, setParsedRepo] = useState<RepoEntry[]>([])
   const [state, setState] = useState<State>("idle")
 
+  const posts = parsedRepo.filter((repo) => repo.collection === "app.bsky.feed.post")
+  const likes = parsedRepo.filter((repo) => repo.collection === "app.bsky.feed.like");
+  const follows = parsedRepo.filter((repo) => repo.collection === "app.bsky.graph.follow")
+  const reposts = parsedRepo.filter((repo) => repo.collection === "app.bsky.feed.repost")
+
   useEffect(() => {
     if (repo) {
-      setState("loading")
       try {
+        setState("loading")
         const repoData = [...iterateAtpRepo(repo as Uint8Array)]
         setParsedRepo(repoData)
       } catch(error) {
         console.error("Error parsing repo", error)
+      } finally {
+        setState("idle")
       }
     }
   }, [repo])
 
-  useEffect(() => {
-    if (!repo) getRepo(did)
-  }, [repo])
-
-  const getRepo = async (did: string) => {
-    setState("loading");
+  const getRepo = useCallback(async (did: string) => {
     try {
-      const data = await agent.com.atproto.sync.getRepo({ did })
-      setRepo(data.data)
+      setState("loading");
+      const data = await agent?.com.atproto.sync.getRepo({ did })
+      setRepo(data?.data)
     } catch(error) {
       console.error("Error fetching repo:", error)
     } finally {
       setState("idle")
     }
-  }
+  }, [agent])
+
+  useEffect(() => {
+    if (!repo) getRepo(did)
+  }, [repo, did, getRepo])
 
   return {
     getRepo,
-    repo: parsedRepo,
+    repo: {
+      posts: posts,
+      likes: likes,
+      follows: follows,
+      reposts: reposts
+    },
     loading: state === "loading"
   }
 }

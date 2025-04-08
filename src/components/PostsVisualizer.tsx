@@ -1,11 +1,12 @@
 import { RepoEntry } from "@atcute/car";
-import { AtpSessionData } from "@atproto/api";
+import AtpAgent, { AtpSessionData } from "@atproto/api";
 import { Post } from "../utils/types";
 import { formatDate } from "../utils/ui";
-import { useState } from "react";
+import { useRepo } from "../hooks/get-repo";
 
-interface PostVisualizerProps {
+export interface PostVisualizerProps {
   did?: string;
+  loading: boolean;
   posts: RepoEntry[];
   className?: string;
   session?: AtpSessionData;
@@ -25,8 +26,8 @@ interface PostVisualizerProps {
  * - atp-no-data-message: Empty state message
  * - atp-post-error: Error message container
  */
-export const PostVisualizer = ({ posts, session, className = "" }: PostVisualizerProps) => {
-  if (posts.length === 0) return <p className="atp-no-data-message">No posts found</p>;
+export const PostVisualizer = ({ posts, session, loading, className = "" }: PostVisualizerProps) => {
+  if (posts.length === 0 && !loading) return <p className="atp-no-data-message">No posts found</p>;
 
   const sortedPosts = [...posts].sort((a, b) => {
     const dateA = (a.record as { createdAt: string })?.createdAt || "";
@@ -63,13 +64,19 @@ export const PostVisualizer = ({ posts, session, className = "" }: PostVisualize
   );
 };
 
-interface PostProps extends Pick<PostVisualizerProps, "did"> {}
+interface PostProps extends Pick<PostVisualizerProps, "did" | "className"> {
+  agent: AtpAgent
+}
 
-// work in progress
-// export const Posts = ({did}: PostProps) => {
-//   const [repo, setRepo] = useState<Uint8Array>()
-//   const [parsedRepo, setParsedRepo] = useState
-//   return (
-
-//   )
-// }
+export const Posts = ({ did, agent, className }: PostProps) => {
+  const identifier = did || ""
+  const { repo, loading } = useRepo({ did: identifier, agent })
+  return (
+    <PostVisualizer
+      posts={repo.posts}
+      className={className}
+      session={agent.session}
+      loading={loading}
+    />
+  )
+}

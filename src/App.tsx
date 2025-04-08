@@ -1,43 +1,22 @@
 import { ChangeEvent, useEffect, useState } from 'react'
 import AtpAgent from "@atproto/api"
 import { BlueSkySessionData } from './utils/types'
-import { iterateAtpRepo, RepoEntry } from "@atcute/car"
-import { PostVisualizer } from './stories/PostsVisualizer';
+import { Posts } from './components/PostsVisualizer';
+import { useRepo } from './hooks/get-repo';
 
-interface VisualizerProps {
+export interface VisualizerProps {
   session?: BlueSkySessionData;
-  agent: AtpAgent
+  agent?: AtpAgent
 }
 
 const Visualizer = ({ session, agent }: VisualizerProps) => {
-  const [repo, setRepo] = useState<Uint8Array>();
-  const [parsedRepo, setParsedRepo] = useState<RepoEntry[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [activeView, setActiveView] = useState<string | null>(null);
-
-  const posts = parsedRepo.filter((repo) => repo.collection === "app.bsky.feed.post");
-  const likes = parsedRepo.filter((repo) => repo.collection === "app.bsky.feed.like");
-  const follows = parsedRepo.filter((repo) => repo.collection === "app.bsky.graph.follow");
-  // there's a repost collection too
-  // const reposts = parsedRepo.filter((repo) => repo.collection === "app.bsky.feed.repost");
-
-  useEffect(() => {
-    if (repo) {
-      setLoading(true);
-      try {
-        const repoData = [...iterateAtpRepo(repo as Uint8Array)];
-        setParsedRepo(repoData);
-      } catch (error) {
-        console.error("Error parsing repo:", error);
-      } finally {
-        setLoading(false);
-      }
-    }
-  }, [repo]);
+  const [activeView, setActiveView] = useState<string>("posts");
+  const did: string = session?.did || "";
+  const { repo, getRepo, loading } = useRepo({ did, agent: agent as AtpAgent })
 
   useEffect(() => {
     if (session && !repo) {
-      getRepo();
+      getRepo(did);
       setActiveView("posts");
     }
   }, [session]);
@@ -50,20 +29,6 @@ const Visualizer = ({ session, agent }: VisualizerProps) => {
     );
   }
 
-  const did: string = session.did || "";
-
-  const getRepo = async () => {
-    setLoading(true);
-    try {
-      const data = await agent.com.atproto.sync.getRepo({ did });
-      setRepo(data.data);
-    } catch (error) {
-      console.error("Error fetching repo:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   return (
     <div className="visualizer">
       <div className="viz-controls">
@@ -72,22 +37,22 @@ const Visualizer = ({ session, agent }: VisualizerProps) => {
             onClick={() => setActiveView("posts")}
             className={activeView === "posts" ? "active" : ""}
           >
-            Posts ({posts.length})
+            Posts ({repo?.posts.length})
           </button>
           <button
             onClick={() => setActiveView("likes")}
             className={activeView === "likes" ? "active" : ""}
           >
-            Likes ({likes.length})
+            Likes ({repo?.likes.length})
           </button>
           <button
             onClick={() => setActiveView("follows")}
             className={activeView === "follows" ? "active" : ""}
           >
-            Follows ({follows.length})
+            Follows ({repo?.follows.length})
           </button>
         </div>
-        <button className="refresh-button" onClick={getRepo}>
+        <button className="refresh-button" onClick={() => getRepo(did)}>
           Refresh Data
         </button>
       </div>
@@ -101,7 +66,7 @@ const Visualizer = ({ session, agent }: VisualizerProps) => {
 
       {!loading && activeView === "posts" && (
         <div className="posts-container">
-          <PostVisualizer posts={posts} session={session} />
+          <Posts agent={agent as AtpAgent} did={session.did} />
         </div>
       )}
 
@@ -204,7 +169,7 @@ function App() {
           )}
         </div>
         <div className="repo-visualizer-container">
-          <Visualizer session={appSession} agent={agent as AtpAgent} />
+          <Visualizer session={appSession} agent={agent} />
         </div>
       </div>
     </div>
