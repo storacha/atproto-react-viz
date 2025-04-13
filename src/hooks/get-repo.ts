@@ -1,6 +1,7 @@
-import { iterateAtpRepo, RepoEntry } from "@atcute/car"
+import { iterateAtpRepo } from "@atcute/car"
 import AtpAgent from "@atproto/api"
 import { useCallback, useEffect, useState } from "react"
+import { ExtendedRepoEntry } from "../utils/types"
 
 export type State = "loading" | "idle"
 
@@ -11,20 +12,35 @@ export type RepoParams = {
 
 export const useRepo = ({ did, agent }: RepoParams) => {
   const [repo, setRepo] = useState<Uint8Array>()
-  const [parsedRepo, setParsedRepo] = useState<RepoEntry[]>([])
+  const [parsedRepo, setParsedRepo] = useState<ExtendedRepoEntry[]>([])
   const [state, setState] = useState<State>("idle")
 
-  const posts = parsedRepo.filter((repo) => repo.collection === "app.bsky.feed.post")
-  const likes = parsedRepo.filter((repo) => repo.collection === "app.bsky.feed.like");
-  const follows = parsedRepo.filter((repo) => repo.collection === "app.bsky.graph.follow")
-  const reposts = parsedRepo.filter((repo) => repo.collection === "app.bsky.feed.repost")
+  const sortByCreatedAtDesc = (entries: ExtendedRepoEntry[]) => {
+    return entries.sort((a, b) => {
+      const dateA = new Date(a.record?.createdAt || 0)
+      const dateB = new Date(b.record?.createdAt || 0)
+      return dateB.getTime() - dateA.getTime()
+    })
+  }
+
+  const posts = sortByCreatedAtDesc(parsedRepo.filter((repo) => repo.collection === "app.bsky.feed.post"))
+  const likes = sortByCreatedAtDesc(parsedRepo.filter((repo) => repo.collection === "app.bsky.feed.like"))
+  const follows = sortByCreatedAtDesc(parsedRepo.filter((repo) => repo.collection === "app.bsky.graph.follow"))
+  const reposts = sortByCreatedAtDesc(parsedRepo.filter((repo) => repo.collection === "app.bsky.feed.repost"))
+  const postsWithEmbeds = posts.filter((post) => post.record && post.record.embed !== undefined)
+
+  const externalEmbed = postsWithEmbeds.filter((post) => post.record.embed?.$type === "app.bsky.embed.external")
+  const imageEmbeds = postsWithEmbeds.filter((post) => post.record.embed?.$type === "app.bsky.embed.images")
+  const quoteEmbeds = postsWithEmbeds.filter((post) => post.record.embed?.$type === "app.bsky.embed.record")
+
+  console.log("posts with embeds", postsWithEmbeds)
 
   useEffect(() => {
     if (repo) {
       try {
         setState("loading")
         const repoData = [...iterateAtpRepo(repo as Uint8Array)]
-        setParsedRepo(repoData)
+        setParsedRepo(repoData as ExtendedRepoEntry[])
       } catch(error) {
         console.error("Error parsing repo", error)
       } finally {
@@ -55,7 +71,12 @@ export const useRepo = ({ did, agent }: RepoParams) => {
       posts: posts,
       likes: likes,
       follows: follows,
-      reposts: reposts
+      reposts: reposts,
+      embeds: {
+        external: externalEmbed,
+        withImages: imageEmbeds,
+        withQuotes: quoteEmbeds
+      }
     },
     loading: state === "loading"
   }
