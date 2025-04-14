@@ -10,7 +10,7 @@ interface BlobsVisualizerProps {
 
 export const BlobsVisualizer: React.FC<BlobsVisualizerProps> = ({ blobs, loading }) => {
   const [lightboxData, setLightboxData] = useState<{imageUrl: string, cid: string, date: string} | null>(null);
-  
+
   const openLightbox = (blob: BlobItem) => {
     if (blob.imageUrl) {
       setLightboxData({
@@ -20,7 +20,7 @@ export const BlobsVisualizer: React.FC<BlobsVisualizerProps> = ({ blobs, loading
       });
     }
   };
-  
+
   const closeLightbox = () => {
     setLightboxData(null);
   };
@@ -38,10 +38,10 @@ export const BlobsVisualizer: React.FC<BlobsVisualizerProps> = ({ blobs, loading
             <div key={`${blob.cid}-${index}`} className="blob-card">
               {blob.isImage && blob.imageUrl ? (
                 <div className="blob-image-container">
-                  <img 
-                    src={blob.imageUrl} 
-                    alt="Blob" 
-                    className="blob-image" 
+                  <img
+                    src={blob.imageUrl}
+                    alt="Blob"
+                    className="blob-image"
                     onClick={() => openLightbox(blob)}
                   />
                 </div>
@@ -62,7 +62,7 @@ export const BlobsVisualizer: React.FC<BlobsVisualizerProps> = ({ blobs, loading
           <p>No blobs found for this user</p>
         </div>
       )}
-      
+
       {lightboxData && (
         <div className="lightbox" onClick={closeLightbox}>
           <div className="lightbox-content">
