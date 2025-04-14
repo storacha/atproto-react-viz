@@ -23,21 +23,52 @@ export const useBlobs = ({ did, agent }: BlobsParams) => {
 
   const getBlobs = useCallback(async (did: string) => {
     if (!agent || !did) return;
-    
+
     try {
       setState("loading");
       const response = await agent.com.atproto.sync.listBlobs({
         did,
-        limit: 1000
+        limit: 100
       });
-      
+
+      if (!response.data.cids?.length) return;
+
+      const records = await agent.com.atproto.repo.listRecords({
+        repo: did,
+        limit: 100,
+        // we may need to adjust this to accommodate other collections
+        // as some embeds may not be in a post collection(?)
+        collection: "app.bsky.feed.post"
+      })
+
+      const blobDateMap: Record<string, string> = {}
+
+      if (records?.data.records) {
+        records.data.records.forEach((record) => {
+          const createdAt = record.value.createdAt
+          // @ts-expect-error we'll consolidate the types referencing images when the embeds PR gets into main
+          // we may also need to include other embed $types for images `app.bsky.embed.record` for instance
+          // but, i'm not sure the thubnails are referenced correctly -- will take a look later
+          if (record.value.embed?.$type === "app.bsky.embed.images") {
+            // @ts-expect-error same here
+            record.value.embed.images.forEach((image) => {
+              const imgCid = image.image?.ref || (typeof image.image === "string" ? image.image : null);
+              if (imgCid) {
+                // @ts-expect-error allow
+                blobDateMap[imgCid] = createdAt
+              }
+            })
+          }
+        })
+      }
+
       if (response?.data) {
-        const newBlobs: BlobItem[] = response.data.cids.map((cid) => ({ 
+        const newBlobs: BlobItem[] = response.data.cids.map((cid) => ({
           cid,
           isImage: false,
-          createdAt: new Date().toISOString()
+          createdAt: blobDateMap[cid]
         }));
-        
+
         const blobsWithData = await Promise.all(
           newBlobs.map(async (blob) => {
             try {
@@ -45,16 +76,16 @@ export const useBlobs = ({ did, agent }: BlobsParams) => {
                 did,
                 cid: blob.cid
               });
-              
+
               const contentType = blobResponse.headers['content-type'];
               const isImage = contentType ? contentType.startsWith('image/') : false;
-              
+
               let imageUrl = undefined;
               if (isImage && blobResponse.data) {
                 const blob = new Blob([blobResponse.data], { type: contentType });
                 imageUrl = URL.createObjectURL(blob);
               }
-              
+
               return {
                 ...blob,
                 mimeType: contentType,
@@ -67,7 +98,7 @@ export const useBlobs = ({ did, agent }: BlobsParams) => {
             }
           })
         );
-        
+
         setBlobs(blobsWithData);
       }
     } catch(error) {
@@ -76,10 +107,10 @@ export const useBlobs = ({ did, agent }: BlobsParams) => {
       setState("idle")
     }
   }, [agent])
-  
+
   const refreshBlobs = useCallback(() => {
     if (did && agent) {
-      setBlobs([]); 
+      setBlobs([]);
       getBlobs(did);
     }
   }, [did, agent, getBlobs]);
