@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { BlobItem } from '../hooks/get-blobs';
+import { formatDate } from '../utils/ui';
 import '../styles/BlobsVisualizer.css';
 
 interface BlobsVisualizerProps {
@@ -10,23 +11,12 @@ interface BlobsVisualizerProps {
 export const BlobsVisualizer: React.FC<BlobsVisualizerProps> = ({ blobs, loading }) => {
   const [lightboxData, setLightboxData] = useState<{imageUrl: string, cid: string, date: string} | null>(null);
   
-  const formatDate = (dateString?: string): string => {
-    if (!dateString) return 'Unknown';
-    
-    const date = new Date(dateString);
-    const day = date.getDate();
-    const month = date.toLocaleString('en-US', { month: 'short' });
-    const year = date.getFullYear();
-    
-    return `${day} ${month} ${year}`;
-  };
-  
   const openLightbox = (blob: BlobItem) => {
     if (blob.imageUrl) {
       setLightboxData({
         imageUrl: blob.imageUrl,
         cid: blob.cid,
-        date: formatDate(blob.createdAt)
+        date: formatDate(String(blob?.createdAt))
       });
     }
   };
@@ -62,7 +52,7 @@ export const BlobsVisualizer: React.FC<BlobsVisualizerProps> = ({ blobs, loading
               )}
               <div className="blob-info">
                 <p className="blob-cid">{blob.cid.substring(0, 10)}...</p>
-                <p className="blob-date">{formatDate(blob.createdAt)}</p>
+                <p className="blob-date">{formatDate(String(blob?.createdAt))}</p>
               </div>
             </div>
           ))}
