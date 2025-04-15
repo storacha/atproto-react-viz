@@ -1,9 +1,11 @@
-import { ChangeEvent, useEffect, useState } from "react";
-import AtpAgent from "@atproto/api";
-import { BlueSkySessionData } from "./utils/types";
-import { Posts } from "./components/PostsVisualizer";
-import { useRepo } from "./hooks/get-repo";
+import { ChangeEvent, useEffect, useState } from 'react'
+import AtpAgent from "@atproto/api"
+import { BlueSkySessionData } from './utils/types'
+import { Posts } from './components/PostsVisualizer';
+import { useRepo } from './hooks/get-repo';
 import { PostWithEmbed } from "./components/Embeds";
+import { useBlobs } from './hooks/get-blobs';
+import { BlobsVisualizer } from './components/BlobsVisualizer';
 
 export interface VisualizerProps {
   session?: BlueSkySessionData;
@@ -13,7 +15,12 @@ export interface VisualizerProps {
 const Visualizer = ({ session, agent }: VisualizerProps) => {
   const [activeView, setActiveView] = useState<string>("posts");
   const did: string = session?.did || "";
-  const { repo, getRepo, loading } = useRepo({ did, agent: agent as AtpAgent });
+  const { repo, getRepo, loading: repoLoading } = useRepo({ did, agent: agent as AtpAgent });
+  const { blobs, loading: blobsLoading, refreshBlobs } = useBlobs({
+    agent: agent as AtpAgent,
+    did: did
+  })
+
   const embedsCount =
     repo.embeds.external?.length +
     repo.embeds.withImages?.length +
@@ -25,6 +32,14 @@ const Visualizer = ({ session, agent }: VisualizerProps) => {
       setActiveView("posts");
     }
   }, [session]);
+
+  const handleRefresh = () => {
+    if (activeView === "blobs") {
+      refreshBlobs();
+    } else {
+      getRepo(did);
+    }
+  };
 
   if (!session) {
     return (
@@ -62,26 +77,32 @@ const Visualizer = ({ session, agent }: VisualizerProps) => {
           >
             Follows ({repo?.follows.length})
           </button>
+          <button
+            onClick={() => setActiveView("blobs")}
+            className={activeView === "blobs" ? "active" : ""}
+          >
+            Blobs ({blobs?.length || 0})
+          </button>
         </div>
-        <button className="refresh-button" onClick={() => getRepo(did)}>
+        <button className="refresh-button" onClick={handleRefresh}>
           Refresh Data
         </button>
       </div>
 
-      {loading && (
+      {repoLoading && activeView !== "blobs" && (
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>Loading your data...</p>
         </div>
       )}
 
-      {!loading && activeView === "posts" && (
+      {!repoLoading && activeView === "posts" && (
         <div className="posts-container">
           <Posts agent={agent as AtpAgent} did={session.did} />
         </div>
       )}
 
-      {!loading && activeView === "embeds" && (
+      {!repoLoading && activeView === "embeds" && (
         <div className="posts-container">
           <PostWithEmbed
             agent={agent as AtpAgent}
@@ -90,15 +111,24 @@ const Visualizer = ({ session, agent }: VisualizerProps) => {
         </div>
       )}
 
-      {!loading && activeView === "likes" && (
+      {!repoLoading && activeView === "likes" && (
         <div className="likes-container">
           <p>I'll get to this soon</p>
         </div>
       )}
 
-      {!loading && activeView === "follows" && (
+      {!repoLoading && activeView === "follows" && (
         <div className="follows-container">
           <p>Follows</p>
+        </div>
+      )}
+
+      {activeView === "blobs" && (
+        <div className="blobs-container">
+          <BlobsVisualizer
+            blobs={blobs}
+            loading={blobsLoading}
+          />
         </div>
       )}
     </div>
