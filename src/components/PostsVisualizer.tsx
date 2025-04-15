@@ -64,7 +64,7 @@ export const PostVisualizer = ({ posts, session, loading, className = "" }: Post
   );
 };
 
-interface PostProps extends Pick<PostVisualizerProps, "did" | "className"> {
+export interface PostProps extends Pick<PostVisualizerProps, "did" | "className"> {
   agent: AtpAgent
 }
 

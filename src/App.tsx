@@ -3,22 +3,28 @@ import AtpAgent from "@atproto/api"
 import { BlueSkySessionData } from './utils/types'
 import { Posts } from './components/PostsVisualizer';
 import { useRepo } from './hooks/get-repo';
+import { PostWithEmbed } from "./components/Embeds";
 import { useBlobs } from './hooks/get-blobs';
 import { BlobsVisualizer } from './components/BlobsVisualizer';
 
 export interface VisualizerProps {
   session?: BlueSkySessionData;
-  agent?: AtpAgent
+  agent?: AtpAgent;
 }
 
 const Visualizer = ({ session, agent }: VisualizerProps) => {
   const [activeView, setActiveView] = useState<string>("posts");
   const did: string = session?.did || "";
-  const { repo, getRepo, loading: repoLoading } = useRepo({ did, agent: agent as AtpAgent })
-  const { blobs, loading: blobsLoading, refreshBlobs } = useBlobs({ 
-    agent: agent as AtpAgent, 
-    did: did 
+  const { repo, getRepo, loading: repoLoading } = useRepo({ did, agent: agent as AtpAgent });
+  const { blobs, loading: blobsLoading, refreshBlobs } = useBlobs({
+    agent: agent as AtpAgent,
+    did: did
   })
+
+  const embedsCount =
+    repo.embeds.external?.length +
+    repo.embeds.withImages?.length +
+    repo.embeds.withQuotes?.length;
 
   useEffect(() => {
     if (session && !repo) {
@@ -52,6 +58,12 @@ const Visualizer = ({ session, agent }: VisualizerProps) => {
             className={activeView === "posts" ? "active" : ""}
           >
             Posts ({repo?.posts.length})
+          </button>
+          <button
+            onClick={() => setActiveView("embeds")}
+            className={activeView === "embeds" ? "active" : ""}
+          >
+            Embeds ({embedsCount})
           </button>
           <button
             onClick={() => setActiveView("likes")}
@@ -90,6 +102,15 @@ const Visualizer = ({ session, agent }: VisualizerProps) => {
         </div>
       )}
 
+      {!repoLoading && activeView === "embeds" && (
+        <div className="posts-container">
+          <PostWithEmbed
+            agent={agent as AtpAgent}
+            did={session.did}
+          />
+        </div>
+      )}
+
       {!repoLoading && activeView === "likes" && (
         <div className="likes-container">
           <p>I'll get to this soon</p>
@@ -104,8 +125,8 @@ const Visualizer = ({ session, agent }: VisualizerProps) => {
 
       {activeView === "blobs" && (
         <div className="blobs-container">
-          <BlobsVisualizer 
-            blobs={blobs} 
+          <BlobsVisualizer
+            blobs={blobs}
             loading={blobsLoading}
           />
         </div>
@@ -115,28 +136,28 @@ const Visualizer = ({ session, agent }: VisualizerProps) => {
 };
 
 function App() {
-  const [handle, setHandle] = useState<string>("")
-  const [password, setPassword] = useState<string>("")
-  const [appSession, setAppSession] = useState<BlueSkySessionData>()
-  const [error, setError] = useState<string>("")
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [agent, setAgent] = useState<AtpAgent>()
+  const [handle, setHandle] = useState<string>("");
+  const [password, setPassword] = useState<string>("");
+  const [appSession, setAppSession] = useState<BlueSkySessionData>();
+  const [error, setError] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [agent, setAgent] = useState<AtpAgent>();
 
   useEffect(() => {
     const newAgent = new AtpAgent({
-      service: "https://bsky.social"
-    })
-    setAgent(newAgent)
-  }, [])
+      service: "https://bsky.social",
+    });
+    setAgent(newAgent);
+  }, []);
 
   const login = async () => {
     if (!handle || !password) {
-      setError("Please enter both handle and password")
-      return
+      setError("Please enter both handle and password");
+      return;
     }
 
     if (!agent) {
-      setError("Agent is not initialized")
+      setError("Agent is not initialized");
       return;
     }
 
@@ -146,16 +167,18 @@ function App() {
 
       const result = await agent.login({
         identifier: handle,
-        password
+        password,
       });
       setAppSession(result.data as BlueSkySessionData);
     } catch (err) {
       console.error("Login error:", err);
-      setError(`Login failed: ${err instanceof Error ? err.message : String(err)}`);
+      setError(
+        `Login failed: ${err instanceof Error ? err.message : String(err)}`,
+      );
     } finally {
       setIsLoading(false);
     }
-  }
+  };
 
   return (
     <div className="app-container">
@@ -169,29 +192,28 @@ function App() {
               />
               <p>logged in as {appSession?.handle}</p>
             </div>
-          ):
-          (
+          ) : (
             <div className="input-group">
               <input
                 type="text"
-                placeholder='Bluesky handle. e.g. kaf.bsky.social'
+                placeholder="Bluesky handle. e.g. kaf.bsky.social"
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setHandle(e.target.value)
+                  setHandle(e.target.value);
                 }}
                 value={handle}
                 className="handle-input"
               />
               <input
                 type="password"
-                placeholder='Password'
+                placeholder="Password"
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setPassword(e.target.value)
+                  setPassword(e.target.value);
                 }}
                 value={password}
                 className="password-input"
               />
               <button onClick={login} disabled={isLoading}>
-                {isLoading ? 'Logging in...' : 'Login'}
+                {isLoading ? "Logging in..." : "Login"}
               </button>
               {error && <div className="error-message">{error}</div>}
             </div>
@@ -202,7 +224,7 @@ function App() {
         </div>
       </div>
     </div>
-  )
+  );
 }
 
-export default App
+export default App;
