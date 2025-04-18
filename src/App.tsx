@@ -1,52 +1,61 @@
 import { ChangeEvent, useEffect, useState } from 'react'
-import AtpAgent from "@atproto/api"
+import AtpAgent from '@atproto/api'
 import { BlueSkySessionData } from './utils/types'
-import { Posts } from './components/PostsVisualizer';
-import { useRepo } from './hooks/get-repo';
-import { PostWithEmbed } from "./components/Embeds";
-import { useBlobs } from './hooks/get-blobs';
-import { BlobsVisualizer } from './components/BlobsVisualizer';
+import { LikedPosts, Posts } from './components/Posts'
+import { useRepo } from './hooks/get-repo'
+import { PostWithEmbed } from './components/Embeds'
+import { useBlobs } from './hooks/get-blobs'
+import { BlobsVisualizer } from './components/BlobsVisualizer'
 
 export interface VisualizerProps {
-  session?: BlueSkySessionData;
-  agent?: AtpAgent;
+  session?: BlueSkySessionData
+  agent?: AtpAgent
 }
 
 const Visualizer = ({ session, agent }: VisualizerProps) => {
-  const [activeView, setActiveView] = useState<string>("posts");
-  const did: string = session?.did || "";
-  const { repo, getRepo, loading: repoLoading } = useRepo({ did, agent: agent as AtpAgent });
-  const { blobs, loading: blobsLoading, refreshBlobs } = useBlobs({
+  const [activeView, setActiveView] = useState<string>('posts')
+  const did: string = session?.did || ''
+  const {
+    repo,
+    getRepo,
+    loading: repoLoading,
+  } = useRepo({ did, agent: agent as AtpAgent })
+  const {
+    blobs,
+    loading: blobsLoading,
+    refreshBlobs,
+  } = useBlobs({
     agent: agent as AtpAgent,
-    did: did
+    did: did,
   })
 
-  const embedsCount =
-    repo.embeds.external?.length +
-    repo.embeds.withImages?.length +
-    repo.embeds.withQuotes?.length;
+  const embedsCount = repo?.embeds ? (
+    (repo.embeds.external?.length || 0) +
+    (repo.embeds.withImages?.length || 0) +
+    (repo.embeds.withQuotes?.length || 0)
+  ) : 0
 
   useEffect(() => {
     if (session && !repo) {
-      getRepo(did);
-      setActiveView("posts");
+      getRepo(did)
+      setActiveView('posts')
     }
-  }, [session]);
+  }, [session])
 
   const handleRefresh = () => {
-    if (activeView === "blobs") {
-      refreshBlobs();
+    if (activeView === 'blobs') {
+      refreshBlobs()
     } else {
-      getRepo(did);
+      getRepo(did)
     }
-  };
+  }
 
   if (!session) {
     return (
       <div className="visualizer">
         <h2>Please log in to see your data visualization</h2>
       </div>
-    );
+    )
   }
 
   return (
@@ -54,32 +63,32 @@ const Visualizer = ({ session, agent }: VisualizerProps) => {
       <div className="viz-controls">
         <div className="viz-tabs">
           <button
-            onClick={() => setActiveView("posts")}
-            className={activeView === "posts" ? "active" : ""}
+            onClick={() => setActiveView('posts')}
+            className={activeView === 'posts' ? 'active' : ''}
           >
-            Posts ({repo?.posts.length})
+            Posts ({repo?.posts?.length || 0})
           </button>
           <button
-            onClick={() => setActiveView("embeds")}
-            className={activeView === "embeds" ? "active" : ""}
+            onClick={() => setActiveView('embeds')}
+            className={activeView === 'embeds' ? 'active' : ''}
           >
             Embeds ({embedsCount})
           </button>
           <button
-            onClick={() => setActiveView("likes")}
-            className={activeView === "likes" ? "active" : ""}
+            onClick={() => setActiveView('likes')}
+            className={activeView === 'likes' ? 'active' : ''}
           >
-            Likes ({repo?.likes.length})
+            Likes ({repo?.likes?.length || 0})
           </button>
           <button
-            onClick={() => setActiveView("follows")}
-            className={activeView === "follows" ? "active" : ""}
+            onClick={() => setActiveView('follows')}
+            className={activeView === 'follows' ? 'active' : ''}
           >
-            Follows ({repo?.follows.length})
+            Follows ({repo?.follows?.length || 0})
           </button>
           <button
-            onClick={() => setActiveView("blobs")}
-            className={activeView === "blobs" ? "active" : ""}
+            onClick={() => setActiveView('blobs')}
+            className={activeView === 'blobs' ? 'active' : ''}
           >
             Blobs ({blobs?.length || 0})
           </button>
@@ -89,96 +98,90 @@ const Visualizer = ({ session, agent }: VisualizerProps) => {
         </button>
       </div>
 
-      {repoLoading && activeView !== "blobs" && (
+      {repoLoading && activeView !== 'blobs' && (
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>Loading your data...</p>
         </div>
       )}
 
-      {!repoLoading && activeView === "posts" && (
+      {!repoLoading && activeView === 'posts' && (
         <div className="posts-container">
           <Posts agent={agent as AtpAgent} did={session.did} />
         </div>
       )}
 
-      {!repoLoading && activeView === "embeds" && (
+      {!repoLoading && activeView === 'embeds' && (
         <div className="posts-container">
-          <PostWithEmbed
-            agent={agent as AtpAgent}
-            did={session.did}
-          />
+          <PostWithEmbed agent={agent as AtpAgent} did={session.did} />
         </div>
       )}
 
-      {!repoLoading && activeView === "likes" && (
-        <div className="likes-container">
-          <p>I'll get to this soon</p>
+      {!repoLoading && activeView === 'likes' && (
+        <div className="posts-container">
+          <LikedPosts agent={agent as AtpAgent} />
         </div>
       )}
 
-      {!repoLoading && activeView === "follows" && (
+      {!repoLoading && activeView === 'follows' && (
         <div className="follows-container">
-          <p>Follows</p>
+          <p>Follows visualization will go here</p>
         </div>
       )}
 
-      {activeView === "blobs" && (
+      {activeView === 'blobs' && (
         <div className="blobs-container">
-          <BlobsVisualizer
-            blobs={blobs}
-            loading={blobsLoading}
-          />
+          <BlobsVisualizer blobs={blobs} loading={blobsLoading} />
         </div>
       )}
     </div>
-  );
-};
+  )
+}
 
 function App() {
-  const [handle, setHandle] = useState<string>("");
-  const [password, setPassword] = useState<string>("");
-  const [appSession, setAppSession] = useState<BlueSkySessionData>();
-  const [error, setError] = useState<string>("");
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [agent, setAgent] = useState<AtpAgent>();
+  const [handle, setHandle] = useState<string>('')
+  const [password, setPassword] = useState<string>('')
+  const [appSession, setAppSession] = useState<BlueSkySessionData>()
+  const [error, setError] = useState<string>('')
+  const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [agent, setAgent] = useState<AtpAgent>()
 
   useEffect(() => {
     const newAgent = new AtpAgent({
-      service: "https://bsky.social",
-    });
-    setAgent(newAgent);
-  }, []);
+      service: 'https://bsky.social',
+    })
+    setAgent(newAgent)
+  }, [])
 
   const login = async () => {
     if (!handle || !password) {
-      setError("Please enter both handle and password");
-      return;
+      setError('Please enter both handle and password')
+      return
     }
 
     if (!agent) {
-      setError("Agent is not initialized");
-      return;
+      setError('Agent is not initialized')
+      return
     }
 
     try {
-      setIsLoading(true);
-      setError("");
+      setIsLoading(true)
+      setError('')
 
       const result = await agent.login({
         identifier: handle,
         password,
-      });
-      setAppSession(result.data as BlueSkySessionData);
+      })
+      setAppSession(result.data as BlueSkySessionData)
     } catch (err) {
-      console.error("Login error:", err);
+      console.error('Login error:', err)
       setError(
-        `Login failed: ${err instanceof Error ? err.message : String(err)}`,
-      );
+        `Login failed: ${err instanceof Error ? err.message : String(err)}`
+      )
     } finally {
-      setIsLoading(false);
+      setIsLoading(false)
     }
-  };
+  }
 
   return (
     <div className="app-container">
@@ -198,7 +201,7 @@ function App() {
                 type="text"
                 placeholder="Bluesky handle. e.g. kaf.bsky.social"
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setHandle(e.target.value);
+                  setHandle(e.target.value)
                 }}
                 value={handle}
                 className="handle-input"
@@ -207,13 +210,13 @@ function App() {
                 type="password"
                 placeholder="Password"
                 onChange={(e: ChangeEvent<HTMLInputElement>) => {
-                  setPassword(e.target.value);
+                  setPassword(e.target.value)
                 }}
                 value={password}
                 className="password-input"
               />
               <button onClick={login} disabled={isLoading}>
-                {isLoading ? "Logging in..." : "Login"}
+                {isLoading ? 'Logging in...' : 'Login'}
               </button>
               {error && <div className="error-message">{error}</div>}
             </div>
@@ -224,7 +227,7 @@ function App() {
         </div>
       </div>
     </div>
-  );
+  )
 }
 
-export default App;
+export default App

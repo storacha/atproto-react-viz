@@ -1,7 +1,6 @@
 import AtpAgent from "@atproto/api"
 import { useCallback, useEffect, useState } from "react"
-
-export type State = "loading" | "idle"
+import { State } from "../utils/types";
 
 export type BlobItem = {
   cid: string;
