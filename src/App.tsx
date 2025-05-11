@@ -6,6 +6,7 @@ import { useRepo } from './hooks/get-repo'
 import { PostWithEmbed } from './components/Embeds'
 import { useBlobs } from './hooks/get-blobs'
 import { BlobsVisualizer } from './components/BlobsVisualizer'
+import { PreferenceVisualizer } from './components/PreferenceVisualizer'
 
 export interface VisualizerProps {
   session?: BlueSkySessionData
@@ -92,13 +93,19 @@ const Visualizer = ({ session, agent }: VisualizerProps) => {
           >
             Blobs ({blobs?.length || 0})
           </button>
+          <button
+            onClick={() => setActiveView('preferences')}
+            className={activeView === 'preferences' ? 'active' : ''}
+          >
+            Preferences
+          </button>
         </div>
         <button className="refresh-button" onClick={handleRefresh}>
           Refresh Data
         </button>
       </div>
 
-      {repoLoading && activeView !== 'blobs' && (
+      {repoLoading && activeView !== 'blobs' && activeView !== 'preferences' && (
         <div className="loading-container">
           <div className="loading-spinner"></div>
           <p>Loading your data...</p>
@@ -132,6 +139,12 @@ const Visualizer = ({ session, agent }: VisualizerProps) => {
       {activeView === 'blobs' && (
         <div className="blobs-container">
           <BlobsVisualizer blobs={blobs} loading={blobsLoading} />
+        </div>
+      )}
+
+      {activeView === 'preferences' && (
+        <div className="preferences-container">
+          <PreferenceVisualizer agent={agent as AtpAgent} />
         </div>
       )}
     </div>
