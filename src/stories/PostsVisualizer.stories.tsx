@@ -1,5 +1,5 @@
 import type { Meta, StoryObj } from '@storybook/react';
-import { PostVisualizer } from "../components/PostsVisualizer";
+import { PostVisualizer } from "../components/Posts/index";
 import { RepoEntry } from "@atcute/car";
 
 import { BlueSkySessionData } from '../utils/types';

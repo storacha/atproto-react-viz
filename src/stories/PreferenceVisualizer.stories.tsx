@@ -16,51 +16,51 @@ export default meta;
 type Story = StoryObj<typeof PreferenceVisualizer>;
 
 // Create a mock agent for the story
-const mockAgent = new BskyAgent({
-  service: 'https://bsky.social',
-});
-
-// Mock the preferences data
-const mockPreferences: Preferences = {
-  preferences: [
-    {
-      $type: 'app.bsky.actor.defs#adultContentPref',
-      enabled: true,
+const mockAgent = {
+  app: {
+    bsky: {
+      actor: {
+        getPreferences: async () => ({
+          data: {
+            preferences: [
+              {
+                $type: 'app.bsky.actor.defs#adultContentPref',
+                enabled: true,
+              },
+              {
+                $type: 'app.bsky.actor.defs#feedViewPref',
+                feed: 'home',
+                hideReplies: false,
+                hideRepliesByUnfollowed: true,
+                hideRepliesByLikeCount: 0,
+                hideReposts: false,
+                hideQuotePosts: false,
+              },
+              {
+                $type: 'app.bsky.actor.defs#threadViewPref',
+                sort: 'latest',
+                prioritizeFollowedUsers: true,
+              },
+              {
+                $type: 'app.bsky.actor.defs#savedFeedsPrefV2',
+                items: [
+                  {
+                    id: 'feed-1',
+                    type: 'feed',
+                    value: 'home',
+                    pinned: true,
+                  },
+                ],
+              },
+            ],
+          },
+          headers: {},
+          success: true,
+        }),
+      },
     },
-    {
-      $type: 'app.bsky.actor.defs#feedViewPref',
-      feed: 'home',
-      hideReplies: false,
-      hideRepliesByUnfollowed: true,
-      hideRepliesByLikeCount: 0,
-      hideReposts: false,
-      hideQuotePosts: false,
-    },
-    {
-      $type: 'app.bsky.actor.defs#threadViewPref',
-      sort: 'latest',
-      prioritizeFollowedUsers: true,
-    },
-    {
-      $type: 'app.bsky.actor.defs#savedFeedsPrefV2',
-      items: [
-        {
-          id: 'feed-1',
-          type: 'feed',
-          value: 'home',
-          pinned: true,
-        },
-      ],
-    },
-  ],
-};
-
-// Mock the agent's getPreferences method
-mockAgent.app.bsky.actor.getPreferences = async () => ({
-  data: mockPreferences,
-  headers: {},
-  success: true,
-});
+  },
+} as unknown as BskyAgent;
 
 export const Default: Story = {
   args: {
@@ -69,13 +69,17 @@ export const Default: Story = {
 };
 
 // Story with error state
-const errorAgent = new BskyAgent({
-  service: 'https://bsky.social',
-});
-
-errorAgent.app.bsky.actor.getPreferences = async () => {
-  throw new Error('Failed to fetch preferences');
-};
+const errorAgent = {
+  app: {
+    bsky: {
+      actor: {
+        getPreferences: async () => {
+          throw new Error('Failed to fetch preferences');
+        },
+      },
+    },
+  },
+} as unknown as BskyAgent;
 
 export const WithError: Story = {
   args: {
